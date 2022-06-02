@@ -1,11 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"time"
 )
 
 const version = "1.0.0"
@@ -21,6 +22,11 @@ type AppStatus struct {
 	Version     string `json:"version"`   
 }
 
+type application struct{
+	config config	
+	logger *log.Logger
+}
+
 func main() {
 	var cfg config
 
@@ -28,27 +34,24 @@ func main() {
 	flag.StringVar(&cfg.env, "env", "development", "application environment (development|production)")
 	flag.Parse()
 
-	fmt.Println("running")
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	
+	app := &application{
+		config: cfg,
+		logger: logger,	
+	}
+    srv := &http.Server{
+		Addr : fmt.Sprintf(":%d", cfg.port), // We assigned cfg.port in the int format thanks to ":%d"
+		Handler : app.routes(),	// what handler do you wanna use?
+		IdleTimeout : time.Minute, // How long do you want time out
+        ReadTimeout : 10 * time.Second,
+		WriteTimeout :  30 * time.Second,
+	}
+    
+	logger.Println("Starting server on port", cfg.port)
 
-	http.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
-		currentStatus := AppStatus{
-			Status: "Avaible",
-			Environment: cfg.env,
-			Version: version,
-		}
-
-		js, err := json.MarshalIndent(currentStatus, "", "\t") // 1) what do you want to convert into JSON on its current status?
-        // 2) do you want to have any kind of prefix?
-		// 3 ) how much do you want to indent it?
-		if err != nil{
-			log.Println(err)
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(js)
-	})
-	err := http.ListenAndServe(fmt.Sprintf(":%d", cfg.port), nil)
+	err := srv.ListenAndServe()
+	
 	if err != nil {
 		log.Println(err)
 	}
