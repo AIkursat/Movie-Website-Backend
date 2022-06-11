@@ -9,7 +9,6 @@ import (
 )
 
 func (app *application) getOneMovie(w http.ResponseWriter, r *http.Request) {
-
 	params := httprouter.ParamsFromContext(r.Context())
 
 	id, err := strconv.Atoi(params.ByName("id"))
@@ -18,8 +17,6 @@ func (app *application) getOneMovie(w http.ResponseWriter, r *http.Request) {
 		app.errorJSON(w, err)
 		return
 	}
-
-	
 
 	movie, err := app.models.DB.Get(id)
 
@@ -42,14 +39,16 @@ func (app *application) getAllMovies(w http.ResponseWriter, r *http.Request) {
 		app.errorJSON(w, err)
 		return
 	}
+
 }
 
-func(app *application) getAllGenres(w http.ResponseWriter, r *http.Request){
-	genres, err := app.models.DB.GenresAll() // Created at movies-db.go file then go to routes 
+func (app *application) getAllGenres(w http.ResponseWriter, r *http.Request) {
+	genres, err := app.models.DB.GenresAll()
 	if err != nil {
 		app.errorJSON(w, err)
 		return
 	}
+
 
 	err = app.writeJSON(w, http.StatusOK, genres, "genres")
 	if err != nil {
@@ -57,12 +56,41 @@ func(app *application) getAllGenres(w http.ResponseWriter, r *http.Request){
 		return
 	}
 }
-/*
-func (app *application) deleteMovie(w http.ResponseWriter, r *http.Request)
 
-func (app *application) insertMovie(w http.ResponseWriter, r *http.Request)
+func (app *application) getAllMoviesByGenre(w http.ResponseWriter, r *http.Request) {
+	params := httprouter.ParamsFromContext(r.Context())
 
-func (app *application) updateMovie(w http.ResponseWriter, r *http.Request)
+	genreID, err := strconv.Atoi(params.ByName("genre_id"))
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
 
-func (app *application) searchMovies(w http.ResponseWriter, r *http.Request)
-*/
+	movies, err := app.models.DB.All(genreID)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, movies, "movies")
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+}
+
+func (app *application) deleteMovie(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (app *application) insertMovie(w http.ResponseWriter, r *http.Request) {
+	
+}
+
+func (app *application) updateMovie(w http.ResponseWriter, r *http.Request) {
+	
+}
+
+func (app *application) searchMovies(w http.ResponseWriter, r *http.Request) {
+	
+}
