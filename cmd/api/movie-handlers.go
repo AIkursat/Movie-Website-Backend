@@ -88,8 +88,26 @@ func (app *application) getAllMoviesByGenre(w http.ResponseWriter, r *http.Reque
 }
 
 func (app *application) deleteMovie(w http.ResponseWriter, r *http.Request) {
+     params := httprouter.ParamsFromContext(r.Context())
 
-}
+	 id, err := strconv.Atoi(params.ByName("id"))
+
+	 if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	err = app.models.DB.DeleteMovie(id)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+
+	ok := jsonResp{
+		OK: true,
+	}
+	err = app.writeJSON(w, http.StatusOK, ok, "response")
+} 
 
 func (app *application) insertMovie(w http.ResponseWriter, r *http.Request) {
 
